@@ -6,7 +6,8 @@
     "start:backend": "cd backend && node studio_stamp.js",
     "start": "concurrently \"astro dev\" \"npm run start:backend\"",
     "build:backend": "cd backend && npm install",
-    "build": "astro check && astro build && npm run build:backend"
+    "build": "astro check && astro build && npm start:backend",
+    "install-all": "npm install && cd backend && npm install"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.3",
