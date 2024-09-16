@@ -6,15 +6,11 @@ interface Props {
 const { title } = Astro.props;
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/img/favicon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
       rel="stylesheet"
@@ -27,7 +23,21 @@ const { title } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Pixelify+Sans:wght@400..700&family=Space+Grotesk:wght@300..700&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/svg+xml" href="/img/favicon.png" />
     <meta name="generator" content={Astro.generator} />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Mii Stamp Generator allows you to create a printable STL Model of your Mii on a Stamp!\n\nAdditional features include Mii -> STL and Mii -> BW SVG" />
+    <meta name="keywords" content="Mii Stamp, WiiLink, Stamp, Mii, Wii, Wii Stamp, Wii Room, Japanese Mii Stamps" />
+    <meta name="author" content="WiiLink" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content="Mii Stamp Generator allows you to create a printable STL Model of your Mii on a Stamp!\n\nAdditional features include Mii -> STL and Mii -> BW SVG" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://stamp.wiilink.ca" />
+    <meta property="og:image" content="/img/seo-bg.png" />
+
     <title>{title}</title>
     <script
       src="https://kit.fontawesome.com/a95bccc25b.js"
