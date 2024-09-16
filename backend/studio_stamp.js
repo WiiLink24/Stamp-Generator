@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { execSync } = require('child_process');
-const { writeFileSync } = require('fs');
+const { writeFileSync, appendFileSync } = require('fs');
 const { randomInt } = require('crypto');
 const { get } = require('https');
 const bodyParser = require('body-parser');
@@ -51,6 +51,7 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
         } else {
             processingQueue[jobId].status = 'Error...';
             processingQueue[jobId].result = 'Invalid platform';
+            logToFile(`Job ID: ${jobId} - Error: Invalid platform, this is not a Wii Mii or a Switch Mii`);
             return;
         }
 
@@ -131,28 +132,33 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
 
                                 processingQueue[jobId].status = 'Completed';
                                 processingQueue[jobId].result = { stl: resultSTL, name: form.filename.replace(/-\(\d{4}-\d{4}-\d{4}\)\.miigx$/, '') };
+                                logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'}) was completed`);
                                 resolve();
                             })
                             .catch(err => {
                                 processingQueue[jobId].status = 'Error';
                                 processingQueue[jobId].result = err.message;
+                                logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'}) Error: ${err.message}`);
                                 reject(err);
                             });
                     } catch (err) {
                         processingQueue[jobId].status = 'Error';
                         processingQueue[jobId].result = err.message;
+                        logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'})  Error: ${err.message}`);
                         reject(err);
                     }
                 });
             }).on('error', (e) => {
                 processingQueue[jobId].status = 'Error';
                 processingQueue[jobId].result = e.message;
+                logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'})  Error: ${e.message}`);
                 reject(e);
             });
         });
     } catch (e) {
         processingQueue[jobId].status = 'Error';
         processingQueue[jobId].result = e.message;
+        logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'})  Error: ${e.message}`);
     } finally {
         fs.rmSync(`./stamps/${randIntFolder}`, { recursive: true });
     }
@@ -258,6 +264,11 @@ function decodeMii(origMii, inputType) {
     }
 
     return miiData;
+}
+
+function logToFile(message) {
+    const timestamp = new Date().toISOString();
+    appendFileSync('log.txt', `[${timestamp}] ${message}\n`);
 }
 
 app.get('/check-status/:jobId', (req, res) => {
