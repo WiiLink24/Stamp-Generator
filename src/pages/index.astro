@@ -104,7 +104,14 @@ import Footer from "../components/Footer.astro";
     const mode = localStorage.getItem("generate") || 0;
     const reader = new FileReader();
     reader.onload = function (event) {
-      const base64String = (event.target.result).split(",")[1];
+           const result = event.target.result;
+           let base64String;
+      if (typeof result === 'string') {
+        base64String = result.split(",")[1];
+        // Proceed with the base64String
+      } else {
+        console.error("Unexpected result type:", typeof result);
+      }
 
       // Send the data to the server
       const formData = new FormData();
@@ -247,7 +254,7 @@ import Footer from "../components/Footer.astro";
 
   const fileElem = document.getElementById("fileElem");
   fileElem.addEventListener("change", (event) => {
-    const file = (event.target).files[0];
+        const file = (event.target as HTMLInputElement).files[0];
     if (file && file.name.endsWith(".miigx")) {
       renderMii(file);
     } else {
