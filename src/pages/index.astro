@@ -4,10 +4,6 @@ import Footer from "../components/Footer.astro";
 ---
 
 <Layout title="WiiLink Mii Stamp Generator" />
-<iframe
-  src="/html/waves.html"
-  class="absolute top-0 left-0 w-full h-full"
-  style="z-index: -1;"></iframe>
 <div class="flex items-center justify-center relative">
   <div
     id="drop-area"
@@ -89,10 +85,35 @@ import Footer from "../components/Footer.astro";
       </p>
     </div>
   </div>
+  <div
+    id="err-multiple-instance"
+    class="m-8 w-[calc(100vw-100px)] h-[calc(100vh-100px)] md:border-4 border-dashed border-white rounded-3xl hidden flex-col gap-3 items-center justify-center text-white transition-all"
+  >
+    <i class="mb-5 fa-solid fa-exclamation-triangle text-7xl"></i>
+    <h1 class="text-4xl font-bold">Continue on the other tab!</h1>
+    <p class="opacity-60">
+      The site is already open in another tab. Please continue there.
+    </p>
+  </div>
 </div>
 <Footer />
 
 <script>
+  // Check if the site is already open in another tab
+  if (localStorage.getItem("siteOpen") === "true") {
+    document.getElementById("drop-area").remove();
+    document.getElementById("err-multiple-instance").classList.remove("hidden");
+    document.getElementById("err-multiple-instance").classList.add("flex");
+  } else {
+    // Set the flag in localStorage
+    localStorage.setItem("siteOpen", "true");
+
+    // Remove the flag when the user closes the tab or navigates away
+    window.addEventListener("beforeunload", () => {
+      localStorage.removeItem("siteOpen");
+    });
+  }
+
   function renderMii(file) {
     const mode = localStorage.getItem("generate") || 0;
     const reader = new FileReader();
@@ -199,7 +220,7 @@ import Footer from "../components/Footer.astro";
     dropArea.style.filter = "brightness(100%)";
     const file = event.dataTransfer.files[0];
     if (file && file.name.endsWith(".miigx")) {
-      localStorage.setItem('generate', "0");
+      localStorage.setItem("generate", "0");
       renderMii(file);
     } else {
       alert("Please upload a .miigx file.");

@@ -33,6 +33,10 @@ const { title } = Astro.props;
       src="https://kit.fontawesome.com/a95bccc25b.js"
       crossorigin="anonymous"></script>
   </head>
+  <iframe
+  src="/html/waves.html"
+  class="absolute top-0 left-0 w-screen h-screen"
+  style="z-index: -1;"></iframe>
   <body>
     <slot />
   </body>
@@ -51,7 +55,7 @@ const { title } = Astro.props;
   }
   html {
     font-family: system-ui, sans-serif;
-    background: #13151a;
+    background: rgba(52, 131, 235, 1);
   }
   code {
     font-family:
