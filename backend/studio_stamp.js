@@ -137,27 +137,28 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
                             })
                             .catch(err => {
                                 processingQueue[jobId].status = 'Error';
-                                processingQueue[jobId].result = err.message;
+                                processingQueue[jobId].result = err.message + "<br><br><b><i class='fa-solid fa-fingerprint'></i> " + jobId + "</b>";
                                 logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'}) Error: ${err.message}`);
                                 reject(err);
                             });
                     } catch (err) {
                         processingQueue[jobId].status = 'Error';
-                        processingQueue[jobId].result = err.message;
+                        processingQueue[jobId].result = "The file you uploaded is corrupted and is not a valid Mii.<br><br><b><i class='fa-solid fa-fingerprint'></i> " + jobId + "</b>";
                         logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'})  Error: ${err.message}`);
+                        err = new Error("The file you uploaded is corrupted and is not a valid Mii.");
                         reject(err);
                     }
                 });
             }).on('error', (e) => {
                 processingQueue[jobId].status = 'Error';
-                processingQueue[jobId].result = e.message;
+                processingQueue[jobId].result = e.message + "<br><br><b><i class='fa-solid fa-fingerprint'></i> " + jobId + "</b>";
                 logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'})  Error: ${e.message}`);
                 reject(e);
             });
         });
     } catch (e) {
         processingQueue[jobId].status = 'Error';
-        processingQueue[jobId].result = e.message;
+        processingQueue[jobId].result = e.message + "<br><br><b><i class='fa-solid fa-fingerprint'></i> " + jobId + "</b>";
         logToFile(`Job ID: ${jobId} - ${form.filename} (${form.stamp == 0 ? 'Stamp' : form.stamp == 1 ? 'Face Only' : 'SVG'})  Error: ${e.message}`);
     } finally {
         fs.rmSync(`./stamps/${randIntFolder}`, { recursive: true });
