@@ -13,7 +13,7 @@ const { primitives, booleans } = require('@jscad/modeling');
 const { translate, scale, center } = require('@jscad/modeling').transforms;
 const { cube } = primitives;
 const { union } = booleans;
-const stlDeserializer = require('@jscad/stl-deserializer')
+const stlDeserializer = require('@jscad/stl-deserializer');
 const fs = require('fs');
 
 const upload = multer();
@@ -22,6 +22,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '5kb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const processingQueue = {};
 
 app.post('/generate-stamp', upload.none(), async (req, res) => {
     const form = req.body;
@@ -36,27 +38,30 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
 
     const randIntFolder = randomInt(1000000, 2000000);
     const randIntFilename = randomInt(1000000, 2000000);
+    const jobId = `${randIntFolder}-${randIntFilename}`;
+
+    processingQueue[jobId] = { status: 'Data received...', result: null };
+
+    res.json({ jobId, status: 'Processing started...' });
 
     try {
         let origMii;
         if (inputType === 'wii') {
-            // Get the data from the file, decode it, and create a new Gen1Wii object 
             origMii = Gen1Wii.fromBytes(Buffer.from(inputData, 'base64'));
         } else {
-            res.status(400).send('Invalid platform');
+            processingQueue[jobId].status = 'Error...';
+            processingQueue[jobId].result = 'Invalid platform';
             return;
         }
 
-        // Decode the Mii data
         let miiData = decodeMii(origMii, inputType);
 
-        // Create a working directory, and encode the data into a Nintendo Studio URL
-        console.log(miiData.toString('hex'));
+        processingQueue[jobId].status = 'Decoding Mii data...';
+        processingQueue[jobId].result = null;
+
         fs.mkdirSync(`./stamps/${randIntFolder}`);
         const miipath = `./stamps/${randIntFolder}/${randIntFilename}`;
         const url = `https://studio.mii.nintendo.com/miis/image.png?${new URLSearchParams({ data: miiData.toString('hex'), type: 'face_only', expression: 'normal', width: '512', instanceCount: '1' }).toString()}`;
-
-        console.log(url.toString());
 
         await new Promise((resolve, reject) => {
             get(url.toString(), (res) => {
@@ -66,11 +71,14 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
                     try {
                         const buffer = Buffer.concat(data);
 
-                        // Create the png image and modify it until it's in a format that can be processed properly
+                        processingQueue[jobId].status = 'Applying effects...';
+                        processingQueue[jobId].result = null;
+
                         writeFileSync(`${miipath}-1.png`, buffer);
                         generateBWImage(miipath);
 
-                        console.log(`Reading image ${randIntFilename}.png`);
+                        processingQueue[jobId].status = 'Generating STL...';
+                        processingQueue[jobId].result = null;
                         sharp(`stamps/${randIntFolder}/${randIntFilename}.png`)
                             .raw()
                             .ensureAlpha()
@@ -79,8 +87,6 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
                                 const { width, height } = info;
                                 let shapes = [];
 
-                                // Iterate over the pixels in the image and generate a cube for each lit up pixel
-                                console.log(`Processing image with dimensions ${width}x${height}`);
                                 for (let y = 0; y < height; y++) {
                                     for (let x = 0; x < width; x++) {
                                         const index = (y * width + x) * 4;
@@ -96,20 +102,20 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
                                     }
                                 }
 
-                                console.log('Unioning shapes');
-
                                 let model;
                                 let stlData;
                                 if (form.stamp == 0) {
-                                    // Add the stamp to the model
                                     const stampData = fs.readFileSync('./stamp.stl');
                                     const stamp = stlDeserializer.deserialize({ output: 'geometry', filename: 'file.stl' }, stampData);
                                     var scaledShapes = shapes.map(shape => scale([0.04, 0.04, 1], shape));
 
-                                    // Finish up and create the final STL file
                                     const centeredStamp = center({}, stamp);
                                     scaledShapes = translate([-8.5, -22, -19], scaledShapes);
                                     model = union(centeredStamp, ...scaledShapes);
+
+                                    processingQueue[jobId].status = 'Serializing STL (This may take a while)...'; 
+                                    processingQueue[jobId].result = null;
+
                                     stlData = serialize({ binary: false }, model);
                                     resultSTL = stlData[0];
                                 } else if (form.stamp == 1) {
@@ -123,35 +129,46 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
                                     resultSTL = stlData;
                                 }
 
-                                console.log('File created successfully')
+                                processingQueue[jobId].status = 'Completed';
+                                processingQueue[jobId].result = { stl: resultSTL, name: form.filename.replace(/-\(\d{4}-\d{4}-\d{4}\)\.miigx$/, '') };
                                 resolve();
                             })
                             .catch(err => {
-                                console.error('Error processing image:', err);
+                                processingQueue[jobId].status = 'Error';
+                                processingQueue[jobId].result = err.message;
                                 reject(err);
                             });
                     } catch (err) {
+                        processingQueue[jobId].status = 'Error';
+                        processingQueue[jobId].result = err.message;
                         reject(err);
                     }
                 });
             }).on('error', (e) => {
-                console.error(e);
+                processingQueue[jobId].status = 'Error';
+                processingQueue[jobId].result = e.message;
                 reject(e);
             });
         });
-
-        // Return the STL file
-        const filename = form.filename;
-        const truncatedFilename = filename.replace(/-\(\d{4}-\d{4}-\d{4}\)\.miigx$/, '');
-        res.json({ stl: resultSTL, name: truncatedFilename });
     } catch (e) {
-        console.error(e);
-        res.status(500).send('Internal Server Error');
+        processingQueue[jobId].status = 'Error';
+        processingQueue[jobId].result = e.message;
     } finally {
         fs.rmSync(`./stamps/${randIntFolder}`, { recursive: true });
     }
 });
 
+app.get('/check-status/:jobId', (req, res) => {
+    const jobId = req.params.jobId;
+    const job = processingQueue[jobId];
+
+    if (!job) {
+        res.status(404).send('Job not found');
+        return;
+    }
+
+    res.json({ status: job.status, result: job.result });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -242,3 +259,15 @@ function decodeMii(origMii, inputType) {
 
     return miiData;
 }
+
+app.get('/check-status/:jobId', (req, res) => {
+    const jobId = req.params.jobId;
+    const job = processingQueue[jobId];
+
+    if (!job) {
+        res.status(404).send('Job not found');
+        return;
+    }
+
+    res.json({ status: job.status, result: job.result });
+});
