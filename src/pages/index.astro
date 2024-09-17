@@ -233,25 +233,28 @@ import Footer from "../components/Footer.astro";
           a.setAttribute("href", url);
           a.click();
 
-          // Save the file on a local storage object with "id" "name" and "data", name also has the filename
-          const files = JSON.parse(localStorage.getItem("files")) || [];
-          if (Number(localStorage.getItem("generate")) === 2) {
-            files.push({
-              id: data.result.id,
-              type: localStorage.getItem("generate"),
-              name: data.result.name,
-              data: data.result.stl,
-            });
+          if (localStorage.getItem("noHistory") === "true") {
+            localStorage.removeItem("noHistory");
           } else {
-            files.push({
-              id: data.result.id,
-              type: localStorage.getItem("generate"),
-              name: data.result.name,
-              data: base64String,
-            });
+            const files = JSON.parse(localStorage.getItem("files")) || [];
+            if (Number(localStorage.getItem("generate")) === 2) {
+              files.push({
+                id: data.result.id,
+                type: localStorage.getItem("generate"),
+                name: data.result.name,
+                data: data.result.stl,
+              });
+            } else {
+              files.push({
+                id: data.result.id,
+                type: localStorage.getItem("generate"),
+                name: data.result.name,
+                data: base64String,
+              });
+            }
+            localStorage.setItem("files", JSON.stringify(files));
+            updateHistory();
           }
-          localStorage.setItem("files", JSON.stringify(files));
-          updateHistory();
 
           // Hide progress bar and show drop area
           document.getElementById("progress-container").classList.add("hidden");
@@ -387,6 +390,7 @@ import Footer from "../components/Footer.astro";
   }
 
   function downloadHistoryFile(index) {
+    localStorage.setItem("noHistory", true);
     const files = JSON.parse(localStorage.getItem("files")) || [];
     const data = files[index];
     if (data.type == "2") {
