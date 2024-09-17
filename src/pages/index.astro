@@ -20,7 +20,7 @@ import Footer from "../components/Footer.astro";
       </p>
       <input type="file" id="fileElem" accept=".miigx" style="display: none;" />
     </div>
-    <div class="w-[calc(100%-50px)] flex flex-col items-center">
+    <div class="sm:w-[calc(100%-50px)] flex flex-col items-center">
       <div id="deleteHistory" class="w-full flex items-center justify-between">
         <p class="text-white font-bold flex items-center">
           <i class="fa-solid fa-history mr-2"></i> History
@@ -41,8 +41,10 @@ import Footer from "../components/Footer.astro";
         <p class="text">Advanced</p>
         <div class="line"></div>
       </div>
-      <div class="mt-3 mb-6 flex flex-row gap-3 items-center justify-center">
-        <select class="mr-5 rounded-lg bg-blue-400 px-5 py-2" id="expression">
+      <div
+        class="mt-3 mb-6 w-full sm:w-auto flex sm:flex-row flex-col sm:gap-3 gap-5 items-center justify-center relative"
+      >
+        <select class="w-full sm:w-auto sm:mr-5 rounded-lg bg-blue-400 px-5 py-2" id="expression">
           <option value="normal" disabled selected>Select expression</option>
           <option value="normal">Normal</option>
           <option value="smile">Smile</option>
@@ -64,26 +66,28 @@ import Footer from "../components/Footer.astro";
           <option value="like_wink_right">Wink Left (Miiverse)</option>
           <option value="frustrated">Frustrated</option>
         </select>
-        |
-        <button
-          class="ml-5 text-white font-bold hover:underline"
-          onclick="localStorage.setItem('generate', 0); document.getElementById('fileElem').click();"
-        >
-          <i class="fa-solid fa-stamp"></i> Generate stamp
-        </button>
-        <button
-          class="ml-3 mr-3 text-white font-bold hover:underline"
-          onclick="localStorage.setItem('generate', 1); document.getElementById('fileElem').click();"
-        >
-          <i class="fa-solid fa-user"></i> Only face
-        </button>
-        <button
-          class="mr-5 text-white font-bold hover:underline"
-          onclick="localStorage.setItem('generate', 2); document.getElementById('fileElem').click();"
-        >
-          <i class="fa-solid fa-file-code"></i> SVG
-        </button>
-        |
+        <span class="sm:block hidden">|</span>
+        <div class="flex flex-row items-center gap-3">
+          <button
+            class="ml-5 text-white font-bold hover:underline"
+            onclick="localStorage.setItem('generate', 0); document.getElementById('fileElem').click();"
+          >
+            <i class="fa-solid fa-stamp"></i> Generate stamp
+          </button>
+          <button
+            class="ml-3 mr-3 text-white font-bold hover:underline"
+            onclick="localStorage.setItem('generate', 1); document.getElementById('fileElem').click();"
+          >
+            <i class="fa-solid fa-user"></i> Only face
+          </button>
+          <button
+            class="mr-5 text-white font-bold hover:underline"
+            onclick="localStorage.setItem('generate', 2); document.getElementById('fileElem').click();"
+          >
+            <i class="fa-solid fa-file-code"></i> SVG
+          </button>
+        </div>
+        <span class="sm:block hidden">|</span>
         <a
           href="https://miicontest.wiilink.ca/search"
           class="ml-5 hover:underline"
