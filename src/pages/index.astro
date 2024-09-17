@@ -339,6 +339,7 @@ import Footer from "../components/Footer.astro";
   });
 
   document.addEventListener("DOMContentLoaded", () => {
+    localStorage.removeItem("noHistory");
     updateHistory();
   });
 
