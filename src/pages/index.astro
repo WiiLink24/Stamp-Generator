@@ -26,8 +26,31 @@ import Footer from "../components/Footer.astro";
         <div class="line"></div>
       </div>
       <div class="mt-3 mb-6 flex flex-row gap-3 items-center justify-center">
+               <select class="mr-5 rounded-lg bg-blue-400 px-5 py-2" id="expression">
+          <option value="normal" disabled selected>Select expression</option>
+          <option value="normal">Normal</option>
+          <option value="smile">Smile</option>
+          <option value="anger">Anger</option>
+          <option value="sorrow">Sorrow</option>
+          <option value="surprise">Surprise</option>
+          <option value="blink">Blink</option>
+          <option value="normal_open_mouth">Normal Surprise</option>
+          <option value="smile_open_mouth">Smile Surprise</option>
+          <option value="anger_open_mouth">Anger Surprise</option>
+          <option value="surprise_open_mouth">Surprise</option>
+          <option value="sorrow_open_mouth">Sorrow Surprise</option>
+          <option value="blink_open_mouth">Blink Surprise</option>
+          <option value="wink_left">Wink Right</option>
+          <option value="wink_right">Wink Left</option>
+          <option value="wink_left_open_mouth">Wink Left Surprise</option>
+          <option value="wink_right_open_mouth">Wink Right Surprise</option>
+          <option value="like_wink_left">Wink Right (Miiverse)</option>
+          <option value="like_wink_right">Wink Left (Miiverse)</option>
+          <option value="frustrated">Frustrated</option>
+        </select>
+          |
         <button
-          class="text-white font-bold hover:underline"
+          class="ml-5 text-white font-bold hover:underline"
           onclick="localStorage.setItem('generate', 0); document.getElementById('fileElem').click();"
         >
           <i class="fa-solid fa-stamp"></i> Generate stamp
@@ -119,6 +142,7 @@ import Footer from "../components/Footer.astro";
       formData.append("filename", file.name);
       formData.append("platform", "wii");
       formData.append("data", base64String);
+      formData.append("expression", document.getElementById("expression").value);
 
       // Show progress bar
       document.getElementById("progress-container").classList.remove("hidden");

@@ -62,7 +62,7 @@ app.post('/generate-stamp', upload.none(), async (req, res) => {
 
         fs.mkdirSync(`./stamps/${randIntFolder}`);
         const miipath = `./stamps/${randIntFolder}/${randIntFilename}`;
-        const url = `https://studio.mii.nintendo.com/miis/image.png?${new URLSearchParams({ data: miiData.toString('hex'), type: 'face_only', expression: 'normal', width: '512', instanceCount: '1' }).toString()}`;
+        const url = `https://studio.mii.nintendo.com/miis/image.png?${new URLSearchParams({ data: miiData.toString('hex'), type: 'face_only', expression: form.expression, width: '512', instanceCount: '1' }).toString()}`;
 
         await new Promise((resolve, reject) => {
             get(url.toString(), (res) => {
