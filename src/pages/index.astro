@@ -21,13 +21,17 @@ import Footer from "../components/Footer.astro";
       <input type="file" id="fileElem" accept=".miigx" style="display: none;" />
     </div>
     <div class="w-[calc(100%-50px)] flex flex-col items-center">
-      <div class="w-full overflow-scroll">
-        <div id="deleteHistory" class="mb-3 flex items-center justify-between">
+      <div id="deleteHistory" class="w-full flex items-center justify-between">
         <p class="text-white font-bold flex items-center">
           <i class="fa-solid fa-history mr-2"></i> History
         </p>
-        <a onclick="localStorage.removeItem('files'); updateHistory();" class="px-3 py-2 rounded-lg text-white font-bold hover:bg-red-500 cursor-pointer transition-all"><i class="fa-solid fa-trash-can"></i></a>
+        <a
+          onclick="localStorage.removeItem('files'); updateHistory();"
+          class="px-3 py-2 rounded-lg text-white font-bold hover:bg-red-500 cursor-pointer transition-all"
+          ><i class="fa-solid fa-trash-can"></i></a
+        >
       </div>
+      <div class="w-full overflow-scroll">
         <div id="local-files" class="mb-3 flex flex-row gap-3 items-center">
         </div>
       </div>
@@ -124,7 +128,9 @@ import Footer from "../components/Footer.astro";
 </div>
 <Footer />
 
-<script>
+<script is:inline>
+  let base64String;
+
   // Check if the site is already open in another tab
   if (localStorage.getItem("siteOpen") === "true") {
     document.getElementById("drop-area").remove();
@@ -141,11 +147,9 @@ import Footer from "../components/Footer.astro";
   }
 
   function renderMii(file) {
-    const mode = localStorage.getItem("generate") || 0;
     const reader = new FileReader();
     reader.onload = function (event) {
       const result = event.target.result;
-      let base64String;
       if (typeof result === "string") {
         base64String = result.split(",")[1];
         // Proceed with the base64String
@@ -217,7 +221,6 @@ import Footer from "../components/Footer.astro";
         return response.json();
       })
       .then((data) => {
-        console.log(data);
         if (data.status === "Completed") {
           const blob = new Blob([data.result.stl], { type: "application/sla" });
           const url = URL.createObjectURL(blob);
@@ -232,12 +235,21 @@ import Footer from "../components/Footer.astro";
 
           // Save the file on a local storage object with "id" "name" and "data", name also has the filename
           const files = JSON.parse(localStorage.getItem("files")) || [];
-          files.push({
-            id: data.result.id,
-            type: localStorage.getItem("generate"),
-            name: data.result.name,
-            data: data.result.stl,
-          });
+          if (Number(localStorage.getItem("generate")) === 2) {
+            files.push({
+              id: data.result.id,
+              type: localStorage.getItem("generate"),
+              name: data.result.name,
+              data: data.result.stl,
+            });
+          } else {
+            files.push({
+              id: data.result.id,
+              type: localStorage.getItem("generate"),
+              name: data.result.name,
+              data: base64String,
+            });
+          }
           localStorage.setItem("files", JSON.stringify(files));
           updateHistory();
 
@@ -315,7 +327,7 @@ import Footer from "../components/Footer.astro";
 
   const fileElem = document.getElementById("fileElem");
   fileElem.addEventListener("change", (event) => {
-    const file = (event.target as HTMLInputElement).files[0];
+    const file = event.target.files[0];
     if (file && file.name.endsWith(".miigx")) {
       renderMii(file);
     } else {
@@ -342,7 +354,6 @@ import Footer from "../components/Footer.astro";
     files.forEach((file, index) => {
       let icon;
       let content;
-      console.log(file.type);
       try {
         switch (file.type) {
           case "0":
@@ -360,7 +371,6 @@ import Footer from "../components/Footer.astro";
               "<svg",
               '<svg width="40" height="40"'
             );
-            console.log(svgContent);
             content = `<div class="p-0 bg-blue-400 rounded-lg"><span class="invert">${svgContent}</span></div> <span><span class="file-name">${file.name}</span><br><span class="opacity-60">SVG</span></span>`;
             break;
           default:
@@ -370,80 +380,36 @@ import Footer from "../components/Footer.astro";
         console.error("Error decoding file data:", error);
         content = `<div class="p-3 bg-red-400 rounded-lg">Error loading file</div> ${file.name}`;
       }
-      // Log the file index
-      console.log(index);
       const a = document.createElement("a");
       a.innerHTML = `<div onclick="downloadHistoryFile(${index});" class="flex flex-row items-center justify-start gap-3 p-2 pr-3 rounded-xl bg-blue-600/20 cursor-pointer border-2 hover:border-white/60 border-blue-600/0 active:scale-95 transition-all">${content}</div>`;
       localFiles.appendChild(a);
     });
   }
-</script>
 
-<script is:inline>
   function downloadHistoryFile(index) {
     const files = JSON.parse(localStorage.getItem("files")) || [];
     const data = files[index];
-    const blob = new Blob([data.data], { type: "application/sla" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    if (Number(data.type) === 2) {
-      a.setAttribute("download", data.name + " Stamp.svg");
-    } else {
-      a.setAttribute("download", data.name + " Stamp.stl");
-    }
-    a.setAttribute("href", url);
-    a.click();
-  }
-
-  function updateHistory() {
-    const files = JSON.parse(localStorage.getItem("files")) || [];
-    const localFiles = document.getElementById("local-files");
-    localFiles.innerHTML = "";
-
-    const deleteHistory = document.getElementById("deleteHistory");
-    if (files.length > 0) {
-      deleteHistory.classList.remove("hidden");
-    } else {
-      deleteHistory.classList.add("hidden");
-    }
-
-    files.forEach((file, index) => {
-      let icon;
-      let content;
-      console.log(file.type);
-      try {
-        switch (file.type) {
-          case "0":
-            icon = "stamp";
-            content = `<i class="p-3 fa-solid fa-${icon} bg-blue-400 rounded-lg"></i> <span><span class="file-name">${file.name}</span><br><span class="opacity-60">Stamp</span></span>`;
-            break;
-          case "1":
-            icon = "user";
-            content = `<i class="p-3 fa-solid fa-${icon} bg-blue-400 rounded-lg"></i> <span><span class="file-name">${file.name}</span><br><span class="opacity-60">Face</span></span>`;
-            break;
-          case "2":
-            let svgContent = file.data;
-            // Set width and height of SVG to 40px
-            svgContent = svgContent.replace(
-              "<svg",
-              '<svg width="40" height="40"'
-            );
-            console.log(svgContent);
-            content = `<div class="p-0 bg-blue-400 rounded-lg"><span class="invert">${svgContent}</span></div> <span><span class="file-name">${file.name}</span><br><span class="opacity-60">SVG</span></span>`;
-            break;
-          default:
-            throw new Error("Unknown file type");
-        }
-      } catch (error) {
-        console.error("Error decoding file data:", error);
-        content = `<div class="p-3 bg-red-400 rounded-lg">Error loading file</div> ${file.name}`;
-      }
-      // Log the file index
-      console.log(index);
+    if (data.type == "2") {
+      const blob = new Blob([data.data], { type: "application/sla" });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.innerHTML = `<div onclick="downloadHistoryFile(${index});" class="flex flex-row items-center justify-start gap-3 p-2 pr-3 rounded-xl bg-blue-600/20 cursor-pointer border-2 hover:border-white/60 border-blue-600/0 active:scale-95 transition-all">${content}</div>`;
-      localFiles.appendChild(a);
-    });
+      a.setAttribute("download", data.name + " Stamp.svg");
+      a.setAttribute("href", url);
+      a.click();
+    } else {
+      const byteCharacters = atob(data.data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: "application/octet-stream" });
+      const fakeFile = new File([blob], `${data.name}.miigx`, {
+        type: "application/octet-stream",
+      });
+      localStorage.setItem("generate", data.type);
+      renderMii(fakeFile);
+    }
   }
 </script>
 
