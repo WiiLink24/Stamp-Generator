@@ -20,7 +20,7 @@ import Footer from "../components/Footer.astro";
       </p>
       <input type="file" id="fileElem" accept=".miigx" style="display: none;" />
     </div>
-    <div class="sm:w-[calc(100%-50px)] flex flex-col items-center">
+    <div class="sm:w-[calc(100%-50px)] w-full flex flex-col items-center">
       <div id="deleteHistory" class="w-full flex items-center justify-between">
         <p class="text-white font-bold flex items-center">
           <i class="fa-solid fa-history mr-2"></i> History
@@ -31,7 +31,7 @@ import Footer from "../components/Footer.astro";
           ><i class="fa-solid fa-trash-can"></i></a
         >
       </div>
-      <div class="w-full overflow-scroll">
+      <div class="w-full overflow-scroll overflow-y-hidden">
         <div id="local-files" class="mb-3 flex flex-row gap-3 items-center">
         </div>
       </div>
