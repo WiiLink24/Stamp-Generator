@@ -38,7 +38,7 @@ import Footer from "../components/Footer.astro";
 
       <div class="line-container opacity-60">
         <div class="line"></div>
-        <p class="text">Advanced</p>
+        <p class="mx-3">Advanced</p>
         <div class="line"></div>
       </div>
       <div
@@ -104,8 +104,7 @@ import Footer from "../components/Footer.astro";
     <div class="flex flex-row gap-3 items-center">
       <img
         src="/img/loading.gif"
-        class="h-10"
-        style="filter:brightness(10000%);"
+        class="h-10 brightness-[10000%]"
       />
       <p class="text">
         <b id="job-status">In queue...</b><br />
@@ -432,15 +431,6 @@ import Footer from "../components/Footer.astro";
     flex: 1;
     height: 1px;
     background-color: white;
-  }
-  .text {
-    margin: 0 10px;
-  }
-  .hidden {
-    display: none;
-  }
-  .text-red-500 {
-    color: #f56565;
   }
   .file-name {
     white-space: nowrap;
