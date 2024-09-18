@@ -45,8 +45,7 @@ const { title } = Astro.props;
   </head>
   <iframe
   src="/html/waves.html"
-  class="absolute top-0 left-0 w-screen h-screen"
-  style="z-index: -1;"></iframe>
+  class="absolute top-0 left-0 w-screen h-screen -z-10"></iframe>
   <body>
     <slot />
   </body>
@@ -77,5 +76,12 @@ const { title } = Astro.props;
       Bitstream Vera Sans Mono,
       Courier New,
       monospace;
+  }
+  * {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  *::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
   }
 </style>
