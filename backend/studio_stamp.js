@@ -15,6 +15,7 @@ const { cube } = primitives;
 const { union } = booleans;
 const stlDeserializer = require('@jscad/stl-deserializer');
 const fs = require('fs');
+require('dotenv').config()
 
 const upload = multer();
 const app = express();

@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Footer from "../components/Footer.astro";
+
+const API_URL = import.meta.env.API_URL;
+console.log(API_URL);
 ---
 
 <Layout title="WiiLink Mii Stamp Generator" />
@@ -129,9 +132,11 @@ import Footer from "../components/Footer.astro";
     </p>
   </div>
 </div>
+<p id="API_URL" class="hidden">{API_URL}</p>
 <Footer />
 
 <script is:inline>
+  const API_URL = document.getElementById("API_URL").innerHTML;
   let base64String;
 
   // Check if the site is already open in another tab
@@ -179,7 +184,7 @@ import Footer from "../components/Footer.astro";
       // Add beforeunload event listener to prevent user from leaving the page
       window.addEventListener("beforeunload", beforeUnloadHandler);
 
-      fetch(`http://localhost:3000/generate-stamp`, {
+      fetch(`${API_URL}/generate-stamp`, {
         method: "POST",
         body: formData,
       })
@@ -216,7 +221,7 @@ import Footer from "../components/Footer.astro";
   }
 
   function checkJobStatus(jobId) {
-    fetch(`http://localhost:3000/check-status/${jobId}`)
+    fetch(`${API_URL}/check-status/${jobId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

@@ -1,13 +1,13 @@
 {
-  "name": "WiiLink Stamp Generator",
+  "name": "wiilink-stamp-generator",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
     "start:backend": "cd backend && node studio_stamp.js",
-    "start": "concurrently \"astro dev\" \"npm run start:backend\"",
+    "start": "concurrently \"cd frontend && astro dev\" \"npm run start:backend\"",
     "build:backend": "cd backend && npm install",
-    "build": "astro check && astro build && npm start:backend",
-    "install-all": "npm install && cd backend && npm install"
+    "build": "cd frontend && astro check && astro build",
+    "install-all": "npm install && cd backend && npm install && cd .. && cd frontend && npm install"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.3",
