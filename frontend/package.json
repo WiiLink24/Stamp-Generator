@@ -2,6 +2,11 @@
   "name": "wiilink-stamp-generator-frontend",
   "type": "module",
   "version": "0.0.1",
+  "scripts": {
+    "build": "astro check && astro build",
+    "start": "astro dev",
+    "dev": "astro dev"
+  },
   "dependencies": {
     "@astrojs/check": "^0.9.3",
     "@astrojs/tailwind": "^5.1.0",

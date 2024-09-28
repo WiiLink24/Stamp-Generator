@@ -9,6 +9,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "sharp": "^0.29.1",
+    "dotenv": "^16.4.5",
     "@jscad/core": "^2.6.9",
     "@jscad/io": "2.4.8",
     "@jscad/modeling": "^2.12.2",
