@@ -15,6 +15,7 @@ const { cube } = primitives;
 const { union } = booleans;
 const stlDeserializer = require('@jscad/stl-deserializer');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config()
 
 const upload = multer();
@@ -23,6 +24,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '5kb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "/public")));
 
 const processingQueue = {};
 

@@ -53,11 +53,8 @@ RUN wget https://www.imagemagick.org/download/ImageMagick.tar.gz && \
     cd .. && \
     rm -rf ImageMagick*
 
-# Verify that imagemagick is installed correctly
-RUN magick --version
-
-# Copy built Astro frontend
-COPY --from=frontend /usr/src/frontend/dist ./public
+# Copy built Astro frontend to usr/src/fontend
+COPY --from=frontend /usr/src/frontend/dist /usr/src/backend/public
 
 # Change port to the port you want to use
 EXPOSE 3000
